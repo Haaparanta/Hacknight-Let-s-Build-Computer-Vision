@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+from .waldo_loader import val_ds, train_ds
+
 
 if TYPE_CHECKING:
     from tensorflow.python.keras import layers
@@ -17,7 +19,7 @@ def make_model():
 
     model = keras.Sequential(
         [
-            keras.Input(shape=(64, 64, 1)),
+            keras.Input(shape=(256, 256, 1)),
             layers.Conv2D(
                 10, (3, 3), strides=(2, 2), padding="valid", activation="relu"
             ),
@@ -27,18 +29,25 @@ def make_model():
             ),
             layers.MaxPool2D(2),
             layers.Flatten(),
-            layers.Dense(2, activation="sigmoid"),
+            layers.Dense(1, activation="sigmoid"),
         ]
     )
     model.summary()
     return model
 
 
-def trained_model(train_loader, validation_loader):
+def trained_model():
+    train_loader = train_ds
+    validation_loader = val_ds
     model = make_model()
-    model.compile(optimizer="Adam", loss="mse")
+    model.compile(optimizer="Adam", loss="binary_crossentropy")
     model.fit(
         train_loader,
         validation_data=validation_loader,
         epochs=20,
     )
+    return model
+
+
+if __name__ == "__main__":
+    model = trained_model()
